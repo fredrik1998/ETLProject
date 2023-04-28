@@ -34,7 +34,7 @@ def transform_data(forecast_data):
 
 def load_data(transformed_data):
     df = pd.DataFrame(transformed_data)
-    df['datetime'] = pd.to_datetime(df['datetime'])
+    df['date'] = pd.to_datetime(df['date'])
     df.set_index('datetime', inplace=True)
     return df
 
