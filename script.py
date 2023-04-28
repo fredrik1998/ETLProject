@@ -13,18 +13,24 @@ def extract_data(API_KEY, city):
 def transform_data(forecast_data):
     city_name = forecast_data['city']['name']
     transformed_data = []
+    date_set = set()
     for data in forecast_data['list']:
-        date = data['dt_txt']
-        transformed_data.append({
-            'city': city_name,
-            'date': date,
-            'datetime': data['dt_txt'],
-            'temperature': data['main']['temp'],
-            'humidity': data['main']['humidity'],
-            'pressure': data['main']['pressure'], 
-        })
+        date = data['dt_txt'].split()[0]
+        time = data['dt_txt'].split()[1] 
+        if date not in date_set and time == '12:00:00':
+            transformed_data.append({
+                'city': city_name,
+                'date': date,
+                'time': time,
+                'datetime': data['dt_txt'],
+                'temperature': data['main']['temp'],
+                'humidity': data['main']['humidity'],
+                'pressure': data['main']['pressure'], 
+            })
+            date_set.add(date)
 
     return transformed_data
+
 
 def load_data(transformed_data):
     df = pd.DataFrame(transformed_data)
@@ -33,27 +39,42 @@ def load_data(transformed_data):
     return df
 
 def show_data(df):
-    plt.figure(figsize=(12, 6))
-    plt.plot(df['temperature'], label='Temperature')
-    plt.plot(df['humidity'], label='Humidity')
-    plt.plot(df['pressure'], label='Pressure')
-    plt.xlabel('Datetime')
-    plt.ylabel('Values')
-    plt.title('Forecast')
-    plt.legend()
+    fig, axis = plt.subplots(3, 1, figsize=(12, 8))
+    axis[0].plot(df['temperature'], label='Temperature')
+    axis[0].set_xlabel('Datetime')
+    axis[0].set_ylabel('Temperature')
+    axis[0].set_title('Temperature Forecast')
+    axis[0].legend()
+    
+    axis[1].plot(df['humidity'], label='Humidity')
+    axis[1].set_xlabel('Datetime')
+    axis[1].set_ylabel('Humidity')
+    axis[1].set_title('Humidity Forecast')
+    axis[1].legend()
+    
+    axis[2].plot(df['pressure'], label='Pressure')
+    axis[2].set_xlabel('Datetime')
+    axis[2].set_ylabel('Pressure')
+    axis[2].set_title('Pressure Forecast')
+    axis[2].legend()
+    
+    plt.tight_layout()
     plt.show()
+
 
 def main():
     API_KEY = 'c4396d65189bf06a392f5e57db17ae82'
-    city = input('Enter city')
-    file_name = 'forecast.csv'
-    
+    city = 'Stockholm'
+    file_name_csv = 'forecast.csv'
+    file_name_json = 'forecast.json'
+
     database_uri = f"postgresql://postgres:noob123@localhost:5432/postgres"
     engine = create_engine(database_uri)
     forecast_data = extract_data(API_KEY, city)
     transformed_data = transform_data(forecast_data)
     df = load_data(transformed_data)
-    df.to_csv(file_name, encoding='utf-8', index=False)
+    df.to_csv(file_name_csv, encoding='utf-8', index=False)
+    df.to_json(file_name_json, orient='records', lines=True)
     df.to_sql(name='forecast',
                 con=engine,
                 index=False,
