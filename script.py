@@ -46,17 +46,20 @@ def show_data(df):
 def main():
     API_KEY = 'c4396d65189bf06a392f5e57db17ae82'
     city = input('Enter city')
+    file_name = 'forecast.csv'
     
     database_uri = f"postgresql://postgres:noob123@localhost:5432/postgres"
     engine = create_engine(database_uri)
     forecast_data = extract_data(API_KEY, city)
     transformed_data = transform_data(forecast_data)
     df = load_data(transformed_data)
+    df.to_csv(file_name, encoding='utf-8', index=False)
     df.to_sql(name='forecast',
                 con=engine,
                 index=False,
                 if_exists='append')
     show_data(df)
+    
 
 if __name__ == "__main__":
     main()
