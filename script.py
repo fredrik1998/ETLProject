@@ -13,21 +13,18 @@ def extract_data(API_KEY, city):
 def transform_data(forecast_data):
     city_name = forecast_data['city']['name']
     transformed_data = []
-    date_set = set()
     for data in forecast_data['list']:
         date = data['dt_txt'].split()[0]
         time = data['dt_txt'].split()[1] 
-        if date not in date_set and time == '12:00:00':
-            transformed_data.append({
-                'city': city_name,
-                'date': date,
-                'time': time,
-                'datetime': data['dt_txt'],
-                'temperature': data['main']['temp'],
-                'humidity': data['main']['humidity'],
-                'pressure': data['main']['pressure'], 
-            })
-            date_set.add(date)
+        transformed_data.append({
+            'city': city_name,
+            'date': date,
+            'time': time,
+            'datetime': data['dt_txt'],
+            'temperature': data['main']['temp'],
+            'humidity': data['main']['humidity'],
+            'pressure': data['main']['pressure'], 
+        })
 
     return transformed_data
 
@@ -35,6 +32,7 @@ def transform_data(forecast_data):
 def load_data(transformed_data):
     df = pd.DataFrame(transformed_data)
     df['date'] = pd.to_datetime(df['date'])
+    df['date'] = df['date'].dt.date
     df.set_index('datetime', inplace=True)
     return df
 
@@ -64,23 +62,25 @@ def show_data(df):
 
 def main():
     API_KEY = 'c4396d65189bf06a392f5e57db17ae82'
-    city = 'Stockholm'
+    cities = ['Stockholm', 'Gothenburg', 'Malmo',]
     file_name_csv = 'forecast.csv'
     file_name_json = 'forecast.json'
 
     database_uri = f"postgresql://postgres:noob123@localhost:5432/postgres"
     engine = create_engine(database_uri)
-    forecast_data = extract_data(API_KEY, city)
-    transformed_data = transform_data(forecast_data)
-    df = load_data(transformed_data)
-    df.to_csv(file_name_csv, encoding='utf-8', index=False)
-    df.to_json(file_name_json, orient='records', lines=True)
-    df.to_sql(name='forecast',
-                con=engine,
-                index=False,
-                if_exists='append')
-    show_data(df)
-    
+
+    for city in cities:
+        forecast_data = extract_data(API_KEY, city)
+        transformed_data = transform_data(forecast_data)
+        df = load_data(transformed_data)
+        df.to_csv(f"{city}_{file_name_csv}", encoding='utf-8', index=False)
+        df.to_json(f"{city}_{file_name_json}", date_format='iso', orient='records', lines=True)
+        table_name = f"{city}_forecast".lower().replace(" ", "_")
+        df.to_sql(name=table_name,
+                  con=engine,
+                  index=False,
+                  if_exists='replace')
+        show_data(df)
 
 if __name__ == "__main__":
     main()
