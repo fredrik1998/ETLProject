@@ -16,8 +16,8 @@ Detta är en ETL pipeline som hämtar väderprognos data från openweathermap AP
 
 
 ## TODO 
-Jag försökte även implementera Apache Airflow till denna pipeline för att automatisera ETL processen men 
-lyckades inte implementera den i tid. Detta är något jag skulle göra om det fanns mer tid.
+Jag försökte även implementera Apache Airflow till denna pipeline för att automatisera ETL processen. Men 
+det blev strul eftersom jag använder Windows och Apache Airflow stödjer inte windows,  så jag behöver använda WSL för att kunna använda Airflow men lyckades inte implementera den i tid.  Detta är något jag skulle göra om det fanns mer tid.
 
 ## Gruppmedlem
 Fredrik Andrén
