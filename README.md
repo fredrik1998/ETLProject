@@ -15,7 +15,8 @@ Detta är en ETL pipeline som hämtar väderprognos data från openweathermap AP
 * Jag har lärt mig att implementera de olika stegen i en ETL pipeline (extract, transform och load).
 
 
-## TODO Jag försökte även implementera Apache Airflow till denna pipeline för att automatisera ETL processen men 
+## TODO 
+Jag försökte även implementera Apache Airflow till denna pipeline för att automatisera ETL processen men 
 lyckades inte implementera den i tid. Detta är något jag skulle göra om det fanns mer tid.
 
 ## Gruppmedlem
